@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ryuu Studio Pro v1.8.9 • Xzetron Ultra AI • Full Input Support</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
+    <style>
+        /* ============================================================ */
+        /* RYUU STUDIO PRO v1.8.9 - COMPLETE STYLESHEET                */
+        /* ============================================================ */
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Fira Code', 'Monaco', monospace;
+            font-size: 13px;
+        }
+
+        /* Dark Theme */
+        .theme-dark {
+            --bg-base: #0a0a0a;
+            --bg-sidebar: #111111;
+            --bg-activity: #1a1a1a;
+            --bg-panel: #0d0d0d;
+            --bg-tabs: #1e1e1e;
+            --bg-tab-active: #0d0d0d;
+            --bg-tab-inactive: #252525;
+            --bg-hover: #2a2a2a;
+            --bg-active-item: #2d2d2d;
+            --bg-input: #1e1e1e;
+            --bg-menu: #1e1e1e;
+            --border-color: #2d2d2d;
+            --border-focus: #8b5cf6;
+            --text-main: #cccccc;
+            --text-muted: #858585;
+            --text-bright: #ffffff;
+            --text-accent: #c084fc;
+            --btn-gradient-start: #8b5cf6;
+            --btn-gradient-end: #a855f7;
+            --code-bg: #0a0a0a;
+            --code-border: #333333;
+            --success: #4ade80;
+            --error: #f87171;
+            --warning: #fbbf24;
+            --info: #60a5fa;
+        }
+
+        /* Light Theme */
+        .theme-light {
+            --bg-base: #f9f9f9;
+            --bg-sidebar: #f0f0f0;
+            --bg-activity: #e4e4e4;
+            --bg-panel: #ffffff;
+            --bg-tabs: #e8e8e8;
+            --bg-tab-active: #ffffff;
+            --bg-tab-inactive: #e0e0e0;
+            --bg-hover: #e0e0e0;
+            --bg-active-item: #d4d4d4;
+            --bg-input: #ffffff;
+            --bg-menu: #f0f0f0;
+            --border-color: #d0d0d0;
+            --border-focus: #f97316;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --text-bright: #000000;
+            --text-accent: #f97316;
+            --btn-gradient-start: #f97316;
+            --btn-gradient-end: #fb923c;
+            --code-bg: #f8f9fa;
+            --code-border: #dee2e6;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            transition: background 0.2s, color 0.2s;
+        }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #777; }
+
+        /* Main Layout */
+        .workbench {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        .main-area {
+            display: flex;
+            flex-grow: 1;
+            height: calc(100vh - 22px);
+            overflow: hidden;
+        }
+
+        /* Activity Bar */
+        .activity-bar {
+            width: 48px;
+            min-width: 48px;
+            background-color: var(--bg-activity);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 12px;
+            z-index: 10;
+            border-right: 1px solid var(--border-color);
+        }
+        
+        .act-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+        
+        .act-icon:hover {
+            color: var(--text-bright);
+            background-color: var(--bg-hover);
+            transform: scale(1.05);
+        }
+        
+        .act-icon.active {
+            color: var(--text-accent);
+            border-left: 2px solid var(--border-focus);
+        }
+        
+        .activity-bar-bottom {
+            margin-top: auto;
+            margin-bottom: 12px;
+        }
+
+        /* Left Sidebar */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            transition: width 0.2s ease;
+        }
+        
+        .sidebar.hidden {
+            width: 0;
+            min-width: 0;
+            overflow: hidden;
+        }
+        
+        .sidebar-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .sidebar-view.active {
+            display: flex;
+        }
+
+        .sidebar-title {
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .icon-btn {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .icon-btn:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-bright);
+        }
+        
+        .sidebar-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        
+        /* File Tree */
+        .tree-item {
+            padding: 6px 8px 6px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+        
+        .tree-item:hover {
+            background-color: var(--bg-hover);
+        }
+        
+        .tree-item.active {
+            background-color: var(--bg-active-item);
+            color: var(--text-bright);
+        }
+        
+        .tree-arrow {
+            width: 20px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .tree-children {
+            margin-left: 24px;
+            display: none;
+        }
+        
+        .tree-children.open {
+            display: block;
+        }
+        
+        .file-icon {
+            width: 20px;
+            font-size: 14px;
+        }
+        
+        .folder-icon {
+            color: #dcb67a;
+        }
+
+        /* Right Sidebar - AI */
+        .right-sidebar {
+            width: 420px;
+            min-width: 420px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border-color);
+            transition: width 0.2s ease;
+        }
+        
+        .right-sidebar.hidden {
+            width: 0;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .right-sidebar-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-active-item);
+        }
+        
+        .right-sidebar-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .model-badge {
+            background: rgba(139, 92, 246, 0.2);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 9px;
+        }
+
+        /* AI Messages */
+        .ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .ai-message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 100%;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        
+        .ai-message.user {
+            background: linear-gradient(135deg, var(--btn-gradient-start), var(--btn-gradient-end));
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .ai-message.assistant {
+            background: var(--bg-input);
+            color: var(--text-main);
+            align-self: flex-start;
+            border-left: 3px solid var(--border-focus);
+            border-bottom-left-radius: 4px;
+        }
+        
+        /* Code Blocks in AI */
+        .code-block-wrapper {
+            margin: 12px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--code-bg);
+            border: 1px solid var(--code-border);
+        }
+        
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 12px;
+            background: var(--bg-active-item);
+            border-bottom: 1px solid var(--code-border);
+            font-size: 11px;
+        }
+        
+        .code-language {
+            font-weight: 600;
+            color: var(--text-accent);
+            text-transform: lowercase;
+        }
+        
+        .copy-code-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        
+        .copy-code-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-bright);
+        }
+        
+        .code-content {
+            padding: 14px;
+            margin: 0;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            background: var(--code-bg);
+        }
+
+        /* AI Input */
+        .ai-input-area {
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .ai-input-area textarea {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text-main);
+            outline: none;
+            font-size: 13px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .ai-input-area textarea:focus {
+            border-color: var(--border-focus);
+        }
+        
+        .ai-input-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        .ai-input-area button {
+            background: linear-gradient(135deg, var(--btn-gradient-start), var(--btn-gradient-end));
+            border: none;
+            border-radius: 20px;
+            padding: 8px 24px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .ai-status {
+            padding: 8px 12px;
+            font-size: 10px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+        }
+
+        /* Editor Area */
+        .editor-group {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-panel);
+            overflow: hidden;
+        }
+        
+        /* Tabs */
+        .tabs-container {
+            height: 36px;
+            background-color: var(--bg-tabs);
+            display: flex;
+            overflow-x: auto;
+            gap: 2px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            background-color: var(--bg-tab-inactive);
+            color: var(--text-muted);
+            cursor: pointer;
+            gap: 8px;
+            font-size: 12px;
+            border-top: 1px solid transparent;
+        }
+        
+        .tab:hover {
+            background-color: var(--bg-hover);
+        }
+        
+        .tab.active {
+            background-color: var(--bg-tab-active);
+            color: var(--text-bright);
+            border-top-color: var(--border-focus);
+        }
+        
+        .tab-close {
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 14px;
+            opacity: 0.6;
+        }
+        
+        .tab-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Breadcrumbs & Run Button */
+        .breadcrumbs {
+            height: 30px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            color: var(--text-muted);
+            font-size: 11px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            gap: 12px;
+        }
+        
+        .run-btn {
+            background: linear-gradient(135deg, var(--btn-gradient-start), var(--btn-gradient-end));
+            color: white;
+            border: none;
+            padding: 4px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: auto;
+            font-weight: bold;
+        }
+
+        .editor-container {
+            flex-grow: 1;
+            position: relative;
+        }
+        
+        #monaco-host {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Bottom Terminal with Input Support */
+        .bottom-panel {
+            height: 280px;
+            background-color: var(--bg-panel);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .bottom-panel.hidden {
+            height: 0;
+            display: none;
+        }
+        
+        .panel-header {
+            height: 32px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 11px;
+            background: var(--bg-tabs);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .panel-tab {
+            margin-right: 16px;
+            cursor: pointer;
+            padding: 4px 0;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        
+        .panel-tab.active {
+            color: var(--text-bright);
+            border-bottom: 1px solid var(--border-focus);
+        }
+        
+        .panel-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .panel-content {
+            flex-grow: 1;
+            padding: 8px 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            background: var(--code-bg);
+        }
+        
+        .term-line {
+            margin-bottom: 4px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .term-prompt {
+            color: var(--text-accent);
+            margin-right: 8px;
+        }
+        
+        .term-input-line {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .term-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            outline: none;
+            font-family: monospace;
+            font-size: 12px;
+            flex: 1;
+        }
+        
+        /* Input waiting indicator */
+        .input-waiting {
+            background: var(--border-focus);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            display: inline-block;
+            margin: 4px 0;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 22px;
+            background-color: var(--border-focus);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 10px;
+        }
+        
+        .status-left, .status-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .status-item {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            height: 22px;
+            border-radius: 3px;
+        }
+        
+        .status-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Command Palette */
+        .overlay-glass {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 90;
+            display: none;
+        }
+        
+        .command-palette {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 520px;
+            background: var(--bg-menu);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+        
+        .cmd-input {
+            background: var(--bg-menu);
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-bright);
+            padding: 14px 18px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .cmd-list {
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        
+        .cmd-item {
+            padding: 10px 18px;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        
+        .cmd-item:hover {
+            background: var(--border-focus);
+            color: white;
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: var(--bg-menu);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 0;
+            z-index: 200;
+            display: none;
+            min-width: 180px;
+        }
+        
+        .ctx-item {
+            padding: 8px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .ctx-item:hover {
+            background: var(--border-focus);
+            color: white;
+        }
+        
+        .ctx-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 6px 0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .ai-message {
+            animation: fadeIn 0.2s ease;
+        }
+    </style>
+</head>
+<body class="theme-dark">
+
+<!-- Overlays -->
+<div class="overlay-glass" id="glass-layer" onclick="closeAllOverlays()"></div>
+
+<!-- Command Palette -->
+<div class="command-palette" id="cmd-palette">
+    <input type="text" class="cmd-input" placeholder="> Type a command..." id="cmd-input">
+    <div class="cmd-list">
+        <div class="cmd-item" onclick="newFile()">📄 New File</div>
+        <div class="cmd-item" onclick="toggleTheme()">🎨 Toggle Theme</div>
+        <div class="cmd-item" onclick="toggleRightSidebar()">🤖 Toggle AI</div>
+        <div class="cmd-item" onclick="runCode()">▶ Run Code</div>
+        <div class="cmd-item" onclick="clearTerminal()">🗑 Clear Terminal</div>
+    </div>
+</div>
+
+<!-- Context Menu -->
+<div class="context-menu" id="context-menu">
+    <div class="ctx-item" onclick="newFile()">📄 New File</div>
+    <div class="ctx-item" onclick="runCode()">▶ Run Code</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item" onclick="toggleTheme()">🎨 Toggle Theme</div>
+</div>
+
+<!-- Main Workbench -->
+<div class="workbench">
+    <div class="main-area">
+        
+        <!-- Activity Bar -->
+        <div class="activity-bar">
+            <div class="act-icon" onclick="toggleSidebar()">☰</div>
+            <div class="act-icon active" onclick="switchSidebarView('explorer')">📁</div>
+            <div class="act-icon" onclick="toggleRightSidebar()">🤖</div>
+            <div class="activity-bar-bottom">
+                <div class="act-icon" onclick="openCommandPalette()">⌘</div>
+            </div>
+        </div>
+
+        <!-- Left Sidebar -->
+        <div id="sidebar" class="sidebar">
+            <div id="view-explorer" class="sidebar-view active">
+                <div class="sidebar-title">
+                    <span>📁 EXPLORER</span>
+                    <span class="icon-btn" onclick="newFile()">📄+</span>
+                </div>
+                <div class="sidebar-content" id="file-tree-container"></div>
+            </div>
+        </div>
+
+        <!-- Editor Area -->
+        <div class="editor-group">
+            <div class="tabs-container" id="tabs-container"></div>
+            <div class="breadcrumbs">
+                <span id="breadcrumb-path">Ryuu Studio Pro v1.8.9</span>
+                <button class="run-btn" onclick="runCode()">▶ Run (F5)</button>
+            </div>
+            <div class="editor-container">
+                <div id="monaco-host"></div>
+            </div>
+
+            <!-- Bottom Terminal with Input Support -->
+            <div id="bottom-panel" class="bottom-panel">
+                <div class="panel-header">
+                    <div class="panel-tab active" onclick="focusTerminal()">TERMINAL</div>
+                    <div class="panel-tab" onclick="showOutputPanel()">OUTPUT</div>
+                    <div class="panel-actions">
+                        <span class="icon-btn" onclick="clearTerminal()">🗑</span>
+                        <span class="icon-btn" onclick="toggleTerminal()">✕</span>
+                    </div>
+                </div>
+                <div class="panel-content" id="terminal-content" onclick="focusTerminal()">
+                    <div class="term-line">⚡ Ryuu Studio Pro v1.8.9 - Full Input Support</div>
+                    <div class="term-line">Supports: console.log | print() | printf() | scanf() | input() | cin | Scanner</div>
+                    <div class="term-line">Type 'help' for commands</div>
+                    <div class="term-line">
+                        <span class="term-prompt">$</span>
+                        <input type="text" id="term-in" class="term-input" onkeydown="handleTerminalCommand(event)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Xzetron Ultra AI -->
+        <div id="right-sidebar" class="right-sidebar">
+            <div class="right-sidebar-header">
+                <h3>👑 Xzetron Ultra <span class="model-badge">744B • 1M context</span></h3>
+                <div>
+                    <span class="icon-btn" onclick="clearAIChat()" title="Clear Chat">🗑</span>
+                    <span class="icon-btn" onclick="toggleRightSidebar()" title="Close">✕</span>
+                </div>
+            </div>
+            <div class="ai-messages" id="ai-messages">
+                <div class="ai-message assistant">✨ <strong>Xzetron Ultra</strong> is ready!<br><br>I can help you with:<br>• Writing code in JS, Python, C, C++, Java<br>• Debugging your programs<br>• Explaining concepts<br><br>Type your question below! 🚀</div>
+            </div>
+            <div class="ai-input-area">
+                <textarea id="ai-input" rows="2" placeholder="Ask Xzetron Ultra... (Shift+Enter = new line, click Send to submit)" onkeydown="handleAIKeydown(event)"></textarea>
+                <div class="ai-input-actions">
+                    <button onclick="sendAIMessage()">📤 Send</button>
+                </div>
+            </div>
+            <div class="ai-status">
+                <span>🔗 Zhipu GLM-4-Flash</span>
+                <span>⚡ 1M context</span>
+                <span>🎯 Multi-language</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-left">
+            <span class="status-item" onclick="toggleTheme()">🎨 Ryuu Studio Pro</span>
+            <span class="status-item" id="cursor-pos">Ln 1, Col 1</span>
+            <span class="status-item" id="file-type">JavaScript</span>
+        </div>
+        <div class="status-right">
+            <span class="status-item" onclick="toggleTerminal()">🖥 Terminal</span>
+            <span class="status-item" onclick="toggleRightSidebar()">🤖 AI</span>
+            <span class="status-item" id="ai-status-indicator">⚡ Ready</span>
+        </div>
+    </div>
+</div>
+<script>
+    // ==================== RYUU STUDIO PRO v1.8.9 ====================
+    // ==================== PART 2: FILE SYSTEM + CORE JS ====================
+    
+    // ---------- API Configuration ----------
+    const ZHIPU_KEY = "yourzhipukeyhere";
+    const ZHIPU_BASE = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
+    
+    // ---------- Global State ----------
+    let editor = null;
+    let currentFile = 'main.js';
+    let currentTheme = 'dark';
+    let aiThinking = false;
+    let openTabs = ['main.js'];
+    let activeTab = 'main.js';
+    let terminalHistory = [];
+    let terminalHistoryIndex = -1;
+    
+    // ---------- Input Handling for scanf/input() ----------
+    let waitingForInput = false;
+    let inputResolve = null;
+    let stdinBuffer = [];
+    
+    // ---------- File System with Multi-Language Support ----------
+    const fileSystem = {
+        'src': {
+            type: 'folder',
+            children: {
+                'main.js': {
+                    type: 'file',
+                    content: `// Welcome to Ryuu Studio Pro v1.8.9! 🚀
+// This version supports INPUT from terminal!
+// Press F5 to run this code
+
+// JavaScript example with input (async)
+async function runProgram() {
+    let name = await input("What's your name? ");
+    console.log("Hello, " + name + "!");
+    
+    let age = await input("Enter your age: ");
+    console.log("You are " + age + " years old!");
+    
+    return "Program completed!";
+}
+
+runProgram();
+`
+                },
+                'example_python.py': {
+                    type: 'file',
+                    content: `# Python example with input
+name = input("What's your name? ")
+print(f"Hello, {name}!")
+
+age = int(input("Enter your age: "))
+print(f"You are {age} years old!")
+
+# Loop example
+for i in range(3):
+    print(f"Count: {i}")
+`
+                },
+                'example_c.c': {
+                    type: 'file',
+                    content: `// C example with scanf
+#include <stdio.h>
+
+int main() {
+    char name[50];
+    int age;
+    
+    printf("Enter your name: ");
+    scanf("%s", name);
+    
+    printf("Enter your age: ");
+    scanf("%d", &age);
+    
+    printf("Hello %s! You are %d years old!\\n", name, age);
+    return 0;
+}
+`
+                },
+                'example_cpp.cpp': {
+                    type: 'file',
+                    content: `// C++ example with cin
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string name;
+    int age;
+    
+    cout << "Enter your name: ";
+    cin >> name;
+    
+    cout << "Enter your age: ";
+    cin >> age;
+    
+    cout << "Hello " << name << "! You are " << age << " years old!" << endl;
+    return 0;
+}
+`
+                },
+                'example_java.java': {
+                    type: 'file',
+                    content: `// Java example with Scanner
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.print("Enter your name: ");
+        String name = scanner.nextLine();
+        
+        System.out.print("Enter your age: ");
+        int age = scanner.nextInt();
+        
+        System.out.println("Hello " + name + "! You are " + age + " years old!");
+        scanner.close();
+    }
+}
+`
+                },
+                'example_game.js': {
+                    type: 'file',
+                    content: `// Simple Number Guessing Game in JavaScript
+async function playGame() {
+    console.log("🎮 Welcome to the Number Guessing Game!");
+    console.log("I'm thinking of a number between 1 and 100...");
+    
+    const secretNumber = Math.floor(Math.random() * 100) + 1;
+    let attempts = 0;
+    let guessed = false;
+    
+    while (!guessed) {
+        let guess = await input("Enter your guess: ");
+        guess = parseInt(guess);
+        attempts++;
+        
+        if (isNaN(guess)) {
+            console.log("Please enter a valid number!");
+        } else if (guess < secretNumber) {
+            console.log("Too low! Try again.");
+        } else if (guess > secretNumber) {
+            console.log("Too high! Try again.");
+        } else {
+            console.log("🎉 Congratulations! You guessed it in " + attempts + " attempts!");
+            guessed = true;
+        }
+    }
+}
+
+playGame();
+`
+                }
+            }
+        },
+        'README.md': {
+            type: 'file',
+            content: `# Ryuu Studio Pro v1.8.9 🚀
+
+## Features
+- ✅ **Monaco Editor** - Same as VS Code
+- ✅ **Xzetron Ultra AI** - Real Zhipu API calls (working from file!)
+- ✅ **Full Input Support** - scanf, input(), cin, Scanner
+- ✅ **Multi-Language** - JavaScript, Python, C, C++, Java
+- ✅ **Terminal Input** - Type responses when code asks
+- ✅ **Output Panel** - See console.log, print, printf results
+- ✅ **Copy Code Button** - Copy AI-generated code with one click
+
+## How to Use Input
+When your code asks for input:
+1. Look for the \`📝\` message in terminal
+2. Type your response in the terminal
+3. Press Enter
+
+## Example Files
+Try these example files in the src folder:
+- **main.js** - JavaScript with async input
+- **example_game.js** - Number guessing game
+- **example_python.py** - Python with input()
+- **example_c.c** - C with scanf
+- **example_cpp.cpp** - C++ with cin
+- **example_java.java** - Java with Scanner
+
+## Shortcuts
+| Shortcut | Action |
+|----------|--------|
+| F5 | Run Code |
+| Ctrl+N | New File |
+| Ctrl+S | Save |
+| Ctrl+T | Toggle Theme |
+| Ctrl+K | Clear Terminal |
+| Ctrl+P | Command Palette |
+
+## AI Commands
+Ask Xzetron Ultra anything! Examples:
+- "How do I make a loop in Python?"
+- "Fix my code"
+- "Write a function to sort an array"
+- "Explain what a promise is"
+
+---
+**Created by Ryuu - Age 11** 🔥
+`
+        },
+        'package.json': {
+            type: 'file',
+            content: `{
+    "name": "ryuu-studio-pro",
+    "version": "1.8.9",
+    "description": "Ultimate code editor with AI and full input support",
+    "main": "src/main.js",
+    "author": "Ryuu",
+    "license": "MIT",
+    "features": [
+        "Monaco Editor",
+        "Zhipu AI Integration",
+        "Multi-language Support",
+        "Terminal Input",
+        "File Explorer",
+        "Command Palette"
+    ]
+}
+`
+        }
+    };
+    
+    // ---------- Helper Functions ----------
+    function addToTerminal(text, type = 'output') {
+        const terminalDiv = document.getElementById('terminal-content');
+        const line = document.createElement('div');
+        line.className = 'term-line';
+        if (type === 'error') {
+            line.style.color = 'var(--error)';
+        } else if (type === 'success') {
+            line.style.color = 'var(--success)';
+        } else if (type === 'warning') {
+            line.style.color = 'var(--warning)';
+        } else if (type === 'input-waiting') {
+            line.style.color = 'var(--info)';
+            line.style.fontWeight = 'bold';
+        } else {
+            line.style.color = 'var(--text-main)';
+        }
+        line.innerHTML = text;
+        terminalDiv.insertBefore(line, terminalDiv.lastElementChild);
+        terminalDiv.scrollTop = terminalDiv.scrollHeight;
+        return line;
+    }
+    
+    function clearTerminal() {
+        const terminalDiv = document.getElementById('terminal-content');
+        terminalDiv.innerHTML = `
+            <div class="term-line">⚡ Ryuu Studio Pro v1.8.9 - Full Input Support</div>
+            <div class="term-line">Supports: console.log | print() | printf() | scanf() | input() | cin | Scanner</div>
+            <div class="term-line">Type 'help' for commands</div>
+            <div class="term-line">
+                <span class="term-prompt">$</span>
+                <input type="text" id="term-in" class="term-input" onkeydown="handleTerminalCommand(event)">
+            </div>
+        `;
+        document.getElementById('term-in')?.focus();
+    }
+    
+    function focusTerminal() {
+        const termInput = document.getElementById('term-in');
+        if (termInput) termInput.focus();
+    }
+    
+    // ---------- Terminal Command Handler ----------
+    function handleTerminalCommand(e) {
+        if (e.key === 'Enter') {
+            const input = e.target;
+            const cmd = input.value.trim();
+            
+            // If waiting for program input, send to program
+            if (waitingForInput) {
+                addToTerminal(`<span class="term-prompt">⌨️ Input:</span> ${cmd}`, 'output');
+                if (inputResolve) {
+                    inputResolve(cmd);
+                    inputResolve = null;
+                }
+                waitingForInput = false;
+                input.value = '';
+                // Reset placeholder
+                input.placeholder = "";
+                return;
+            }
+            
+            // Normal terminal command
+            if (cmd) {
+                terminalHistory.push(cmd);
+                terminalHistoryIndex = terminalHistory.length;
+            }
+            
+            addToTerminal(`<span class="term-prompt">$</span> ${cmd}`, 'output');
+            
+            if (cmd === 'clear') {
+                clearTerminal();
+            } else if (cmd === 'help') {
+                addToTerminal('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'success');
+                addToTerminal('📖 AVAILABLE COMMANDS:', 'success');
+                addToTerminal('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'output');
+                addToTerminal('  help     - Show this help menu', 'output');
+                addToTerminal('  clear    - Clear terminal screen', 'output');
+                addToTerminal('  run      - Run current file', 'output');
+                addToTerminal('  ls       - List all files', 'output');
+                addToTerminal('  theme    - Toggle dark/light theme', 'output');
+                addToTerminal('  files    - Show all files in src', 'output');
+                addToTerminal('  version  - Show version info', 'output');
+                addToTerminal('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'output');
+                addToTerminal('💡 TIP: Press F5 to run code quickly!', 'info');
+            } else if (cmd === 'ls' || cmd === 'files') {
+                addToTerminal('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'success');
+                addToTerminal('📁 FILES IN src:', 'success');
+                addToTerminal('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'output');
+                if (fileSystem.src.children) {
+                    Object.keys(fileSystem.src.children).forEach(f => {
+                        const icon = f.endsWith('.js') ? '🟨' : f.endsWith('.py') ? '🐍' : f.endsWith('.c') ? '⚙️' : f.endsWith('.cpp') ? '⚙️' : f.endsWith('.java') ? '☕' : '📄';
+                        addToTerminal(`  ${icon} ${f}`, 'output');
+                    });
+                }
+                addToTerminal('  📖 README.md', 'output');
+                addToTerminal('  📦 package.json', 'output');
+            } else if (cmd === 'run') {
+                runCode();
+            } else if (cmd === 'theme') {
+                toggleTheme();
+            } else if (cmd === 'version') {
+                addToTerminal('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'success');
+                addToTerminal('🎮 RYUU STUDIO PRO v1.8.9', 'success');
+                addToTerminal('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'output');
+                addToTerminal('  📅 Release: May 2026', 'output');
+                addToTerminal('  👤 Creator: Ryuu (Age 11)', 'output');
+                addToTerminal('  🤖 AI: Xzetron Ultra (744B)', 'output');
+                addToTerminal('  📝 Editor: Monaco (VS Code)', 'output');
+                addToTerminal('  🎯 Features: Full input support!', 'output');
+            } else if (cmd === '') {
+                // nothing
+            } else {
+                addToTerminal(`❌ Command not found: ${cmd}`, 'error');
+                addToTerminal(`💡 Type 'help' to see available commands`, 'info');
+            }
+            
+            input.value = '';
+            focusTerminal();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (terminalHistoryIndex > 0) {
+                terminalHistoryIndex--;
+                e.target.value = terminalHistory[terminalHistoryIndex];
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (terminalHistoryIndex < terminalHistory.length - 1) {
+                terminalHistoryIndex++;
+                e.target.value = terminalHistory[terminalHistoryIndex];
+            } else if (terminalHistoryIndex === terminalHistory.length - 1) {
+                terminalHistoryIndex = terminalHistory.length;
+                e.target.value = '';
+            }
+        }
+    }
+    
+    // ---------- Custom Input Function for Programs ----------
+    async function getProgramInput(promptText) {
+        addToTerminal(`<span class="term-prompt">📝 ${promptText}</span>`, 'input-waiting');
+        waitingForInput = true;
+        
+        // Focus and style the terminal input
+        const termInput = document.getElementById('term-in');
+        if (termInput) {
+            termInput.placeholder = "Type your input here...";
+            termInput.focus();
+        }
+        
+        // Create a promise that will resolve when user enters input
+        return new Promise((resolve) => {
+            inputResolve = (value) => {
+                termInput.placeholder = "";
+                resolve(value);
+            };
+        });
+    }
+    
+    // ---------- Output Panel ----------
+    function showOutputPanel() {
+        const terminalDiv = document.getElementById('terminal-content');
+        
+        const separator = document.createElement('div');
+        separator.className = 'term-line';
+        separator.style.color = 'var(--text-accent)';
+        separator.innerHTML = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+        terminalDiv.insertBefore(separator, terminalDiv.lastElementChild);
+        
+        const header = document.createElement('div');
+        header.className = 'term-line';
+        header.style.color = 'var(--success)';
+        header.innerHTML = '📤 OUTPUT PANEL - Code Results';
+        terminalDiv.insertBefore(header, terminalDiv.lastElementChild);
+        
+        const code = editor ? editor.getValue() : '';
+        const ext = currentFile.split('.').pop().toLowerCase();
+        
+        // Find all output statements based on language
+        const outputs = [];
+        
+        // JavaScript/TypeScript console.log
+        const jsPattern = /console\.log\(['"`]([^'"`]*)['"`]\)/g;
+        let match;
+        while ((match = jsPattern.exec(code)) !== null) {
+            outputs.push(`[JS] console.log: ${match[1]}`);
+        }
+        
+        // Python print
+        const pyPattern = /print\(['"`]([^'"`]*)['"`]\)/g;
+        while ((match = pyPattern.exec(code)) !== null) {
+            outputs.push(`[Python] print: ${match[1]}`);
+        }
+        
+        // C/C++ printf
+        const cPattern = /printf\(["']([^"']*)["']/g;
+        while ((match = cPattern.exec(code)) !== null) {
+            outputs.push(`[C/C++] printf: ${match[1].replace(/\\n/g, '\\n')}`);
+        }
+        
+        // Java System.out.println
+        const javaPattern = /System\.out\.println\(["']([^"']*)["']\)/g;
+        while ((match = javaPattern.exec(code)) !== null) {
+            outputs.push(`[Java] System.out.println: ${match[1]}`);
+        }
+        
+        // cout in C++
+        const coutPattern = /cout\s*<<\s*["']([^"']*)["']/g;
+        while ((match = coutPattern.exec(code)) !== null) {
+            outputs.push(`[C++] cout: ${match[1]}`);
+        }
+        
+        if (outputs.length > 0) {
+            const logsLine = document.createElement('div');
+            logsLine.className = 'term-line';
+            logsLine.innerHTML = `📝 <strong>Found ${outputs.length} output statement(s):</strong><br>${outputs.map(log => `&nbsp;&nbsp;→ ${log}`).join('<br>')}`;
+            terminalDiv.insertBefore(logsLine, terminalDiv.lastElementChild);
+        } else {
+            const noLogsLine = document.createElement('div');
+            noLogsLine.className = 'term-line';
+            noLogsLine.innerHTML = '💡 No output statements found. Try adding:<br>&nbsp;&nbsp;<code style="background:var(--bg-input);padding:2px 6px;border-radius:4px;">console.log("Hello!");</code><br>&nbsp;&nbsp;<code style="background:var(--bg-input);padding:2px 6px;border-radius:4px;">print("Hello!")</code><br>&nbsp;&nbsp;<code style="background:var(--bg-input);padding:2px 6px;border-radius:4px;">printf("Hello!");</code>';
+            terminalDiv.insertBefore(noLogsLine, terminalDiv.lastElementChild);
+        }
+        
+        const footer = document.createElement('div');
+        footer.className = 'term-line';
+        footer.style.color = 'var(--text-accent)';
+        footer.innerHTML = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+        terminalDiv.insertBefore(footer, terminalDiv.lastElementChild);
+        
+        terminalDiv.scrollTop = terminalDiv.scrollHeight;
+        
+        // Switch active tab visually
+        document.querySelectorAll('.panel-tab').forEach(tab => tab.classList.remove('active'));
+        const outputTab = document.querySelectorAll('.panel-tab')[1];
+        if (outputTab) outputTab.classList.add('active');
+    }
+    
+    // ---------- File Tree Rendering ----------
+    function renderFileTree() {
+        const container = document.getElementById('file-tree-container');
+        if (!container) return;
+        
+        function renderNode(node, name, path, depth = 0) {
+            if (node.type === 'folder') {
+                const children = Object.entries(node.children || {});
+                let html = `<div class="tree-item" style="padding-left: ${depth * 16 + 8}px" data-path="${path}">
+                    <span class="tree-arrow" onclick="event.stopPropagation(); toggleFolder('${path}')">📁</span>
+                    <span class="file-icon folder-icon">📁</span>
+                    <span class="file-name">${name}</span>
+                </div>`;
+                html += `<div class="tree-children" id="folder-${path.replace(/[\/.]/g, '-')}">`;
+                for (const [childName, childNode] of children) {
+                    html += renderNode(childNode, childName, path + '/' + childName, depth + 1);
+                }
+                html += `</div>`;
+                return html;
+            } else {
+                const displayName = name;
+                const isActive = currentFile === path;
+                // Add emoji based on file type
+                let emoji = '📄';
+                if (name.endsWith('.js')) emoji = '🟨';
+                else if (name.endsWith('.py')) emoji = '🐍';
+                else if (name.endsWith('.c')) emoji = '⚙️';
+                else if (name.endsWith('.cpp')) emoji = '⚙️';
+                else if (name.endsWith('.java')) emoji = '☕';
+                else if (name.endsWith('.md')) emoji = '📖';
+                else if (name.endsWith('.json')) emoji = '📦';
+                
+                return `<div class="tree-item ${isActive ? 'active' : ''}" style="padding-left: ${depth * 16 + 28}px" data-file="${path}" onclick="openFile('${path}')">
+                    <span class="file-icon">${emoji}</span>
+                    <span class="file-name">${displayName}</span>
+                </div>`;
+            }
+        }
+        
+        let html = '';
+        for (const [name, node] of Object.entries(fileSystem)) {
+            html += renderNode(node, name, name, 0);
+        }
+        container.innerHTML = html;
+    }
+    
+    function toggleFolder(path) {
+        const folderId = `folder-${path.replace(/[\/.]/g, '-')}`;
+        const folder = document.getElementById(folderId);
+        if (folder) {
+            folder.classList.toggle('open');
+            const arrow = document.querySelector(`[data-path="${path}"] .tree-arrow`);
+            if (arrow) {
+                arrow.textContent = folder.classList.contains('open') ? '📂' : '📁';
+            }
+        }
+    }
+    
+    function getFileContent(path) {
+        const parts = path.split('/');
+        let current = fileSystem;
+        for (const part of parts) {
+            if (current.children) {
+                current = current.children[part];
+            } else {
+                current = current[part];
+            }
+            if (!current) return `// File not found: ${path}`;
+        }
+        return current.content || `// Empty file: ${path}`;
+    }
+    
+    function saveFileContent(path, content) {
+        const parts = path.split('/');
+        let current = fileSystem;
+        for (let i = 0; i < parts.length - 1; i++) {
+            if (current.children) {
+                current = current.children[parts[i]];
+            } else {
+                current = current[parts[i]];
+            }
+            if (!current) return false;
+        }
+        const fileName = parts[parts.length - 1];
+        if (current.children && current.children[fileName]) {
+            current.children[fileName].content = content;
+            return true;
+        } else if (current[fileName]) {
+            current[fileName].content = content;
+            return true;
+        }
+        return false;
+    }
+    // ---------- Tab Management ----------
+    function renderTabs() {
+        const container = document.getElementById('tabs-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        for (const tab of openTabs) {
+            const tabEl = document.createElement('div');
+            tabEl.className = `tab ${activeTab === tab ? 'active' : ''}`;
+            tabEl.setAttribute('data-file', tab);
+            const displayName = tab.split('/').pop();
+            tabEl.innerHTML = `${displayName} <span class="tab-close" onclick="event.stopPropagation(); closeTab('${tab}')">×</span>`;
+            tabEl.onclick = () => openFile(tab);
+            container.appendChild(tabEl);
+        }
+    }
+    
+    function openFile(filename) {
+        currentFile = filename;
+        activeTab = filename;
+        
+        if (!openTabs.includes(filename)) {
+            openTabs.push(filename);
+        }
+        
+        const content = getFileContent(filename);
+        if (editor) {
+            editor.setValue(content);
+            
+            // Set language based on extension
+            const ext = filename.split('.').pop().toLowerCase();
+            let language = 'plaintext';
+            switch(ext) {
+                case 'js': language = 'javascript'; break;
+                case 'ts': language = 'typescript'; break;
+                case 'py': language = 'python'; break;
+                case 'c': language = 'c'; break;
+                case 'cpp': language = 'cpp'; break;
+                case 'java': language = 'java'; break;
+                case 'md': language = 'markdown'; break;
+                case 'json': language = 'json'; break;
+                case 'css': language = 'css'; break;
+                case 'html': language = 'html'; break;
+            }
+            monaco.editor.setModelLanguage(editor.getModel(), language);
+            
+            // Update file type in status bar
+            document.getElementById('file-type').innerHTML = language.toUpperCase();
+        }
+        
+        renderTabs();
+        renderFileTree();
+        
+        const displayName = filename.split('/').pop();
+        document.getElementById('breadcrumb-path').innerHTML = `Ryuu Studio Pro / ${displayName}`;
+    }
+    
+    function closeTab(filename) {
+        const index = openTabs.indexOf(filename);
+        if (index !== -1) {
+            openTabs.splice(index, 1);
+        }
+        
+        if (openTabs.length === 0) {
+            openTabs.push('README.md');
+        }
+        
+        if (activeTab === filename) {
+            activeTab = openTabs[0];
+            openFile(activeTab);
+        } else {
+            renderTabs();
+        }
+    }
+    
+    function newFile() {
+        const ext = prompt('Choose file type:\n1. JavaScript (.js)\n2. TypeScript (.ts)\n3. Python (.py)\n4. C (.c)\n5. C++ (.cpp)\n6. Java (.java)\n\nEnter number or extension:', 'js');
+        
+        let extension = 'js';
+        let template = '';
+        
+        if (ext === '1' || ext === 'js') {
+            extension = 'js';
+            template = `// New JavaScript file\nconsole.log("Hello from new file!");\n\n// Try using input:\n// let name = await input("What's your name? ");\n// console.log("Hello, " + name);\n`;
+        } else if (ext === '2' || ext === 'ts') {
+            extension = 'ts';
+            template = `// New TypeScript file\nfunction greet(name: string): string {\n    return \`Hello, \${name}!\`;\n}\n\nconsole.log(greet("World"));\n`;
+        } else if (ext === '3' || ext === 'py') {
+            extension = 'py';
+            template = `# New Python file\nname = input("What's your name? ")\nprint(f"Hello, {name}!")\n`;
+        } else if (ext === '4' || ext === 'c') {
+            extension = 'c';
+            template = `// New C file\n#include <stdio.h>\n\nint main() {\n    char name[50];\n    printf("Enter your name: ");\n    scanf("%s", name);\n    printf("Hello, %s!\\n", name);\n    return 0;\n}\n`;
+        } else if (ext === '5' || ext === 'cpp') {
+            extension = 'cpp';
+            template = `// New C++ file\n#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string name;\n    cout << "Enter your name: ";\n    cin >> name;\n    cout << "Hello, " << name << "!" << endl;\n    return 0;\n}\n`;
+        } else if (ext === '6' || ext === 'java') {
+            extension = 'java';
+            template = `// New Java file\nimport java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        System.out.print("Enter your name: ");\n        String name = scanner.nextLine();\n        System.out.println("Hello, " + name + "!");\n        scanner.close();\n    }\n}\n`;
+        } else {
+            extension = ext;
+            template = `// New ${extension} file\n`;
+        }
+        
+        const name = prompt('Enter file name:', `newfile.${extension}`);
+        if (name) {
+            if (!fileSystem.src.children) fileSystem.src.children = {};
+            fileSystem.src.children[name] = {
+                type: 'file',
+                content: template
+            };
+            openFile('src/' + name);
+            renderFileTree();
+            addToTerminal(`✅ Created new ${extension.toUpperCase()} file: ${name}`, 'success');
+        }
+    }
+    
+    function saveFile() {
+        if (editor) {
+            const content = editor.getValue();
+            saveFileContent(currentFile, content);
+            addToTerminal(`✅ Saved: ${currentFile.split('/').pop()}`, 'success');
+        }
+    }
+    
+    // ---------- RUN CODE WITH FULL INPUT SUPPORT (scanf, input, cin) ----------
+    async function runCode() {
+        if (!editor) {
+            addToTerminal('❌ Editor not ready!', 'error');
+            return;
+        }
+        
+        const code = editor.getValue();
+        const filename = currentFile;
+        const ext = filename.split('.').pop().toLowerCase();
+        
+        addToTerminal(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'output');
+        addToTerminal(`▶ Running: ${filename.split('/').pop()}`, 'success');
+        addToTerminal(`📋 Language: ${ext.toUpperCase()}`, 'output');
+        addToTerminal(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'output');
+        
+        // Reset input state
+        waitingForInput = false;
+        if (inputResolve) {
+            inputResolve(null);
+            inputResolve = null;
+        }
+        
+        // Store console.log output
+        const logs = [];
+        const originalLog = console.log;
+        console.log = (...args) => {
+            logs.push(args.join(' '));
+            originalLog(...args);
+        };
+        
+        try {
+            if (ext === 'js' || ext === 'javascript') {
+                // ========== JAVASCRIPT EXECUTION WITH INPUT SUPPORT ==========
+                addToTerminal('🟡 Executing JavaScript...', 'output');
+                
+                // Create a custom input function for JavaScript
+                const customInput = async (promptText) => {
+                    if (promptText) {
+                        return await getProgramInput(promptText);
+                    }
+                    return await getProgramInput('Input: ');
+                };
+                
+                // Create a readline-like interface simulation
+                const readlineSim = {
+                    createInterface: (options) => {
+                        return {
+                            question: async (query, callback) => {
+                                const answer = await getProgramInput(query);
+                                callback(answer);
+                            },
+                            close: () => {
+                                addToTerminal('✓ Input stream closed', 'output');
+                            }
+                        };
+                    }
+                };
+                
+                // Prepare to execute
+                const asyncFunc = new Function('console', 'input', 'readline', 'require', 
+                    `return (async () => { ${code} })();`
+                );
+                
+                try {
+                    const result = await asyncFunc(console, customInput, readlineSim, (module) => {
+                        if (module === 'readline') return readlineSim;
+                        return null;
+                    });
+                    if (result !== undefined) {
+                        addToTerminal(`📤 Return value: ${result}`, 'output');
+                    }
+                } catch (execErr) {
+                    // Try without async wrapper for non-async code
+                    const syncFunc = new Function('console', 'input', 'readline', 'require', code);
+                    syncFunc(console, customInput, readlineSim, (module) => {
+                        if (module === 'readline') return readlineSim;
+                        return null;
+                    });
+                }
+                
+            } 
+            else if (ext === 'py' || ext === 'python') {
+                // ========== PYTHON SIMULATION WITH INPUT SUPPORT ==========
+                addToTerminal('🐍 Simulating Python execution...', 'output');
+                addToTerminal('ℹ️ Python runs in simulation mode. input() is supported!', 'info');
+                
+                // Find and execute print statements
+                const printRegex = /print\(['"`](.*?)['"`]\)/g;
+                let match;
+                while ((match = printRegex.exec(code)) !== null) {
+                    logs.push(`[Python] ${match[1]}`);
+                }
+                
+                // Handle input() calls
+                const inputRegex = /(\w+)\s*=\s*input\(['"`](.*?)['"`]\)/g;
+                let inputMatch;
+                while ((inputMatch = inputRegex.exec(code)) !== null) {
+                    const varName = inputMatch[1];
+                    const prompt = inputMatch[2];
+                    const value = await getProgramInput(prompt);
+                    logs.push(`[Python] ${varName} = "${value}"`);
+                }
+                
+                // Handle input() without variable assignment
+                const standaloneInputRegex = /input\(['"`](.*?)['"`]\)/g;
+                while ((match = standaloneInputRegex.exec(code)) !== null) {
+                    if (!inputRegex.test(match[0])) {
+                        await getProgramInput(match[1]);
+                    }
+                }
+                
+                // Handle f-strings and variables
+                const fstringRegex = /print\(f["'](.*?)["']\)/g;
+                while ((match = fstringRegex.exec(code)) !== null) {
+                    let text = match[1];
+                    const varRegex = /\{([^}]+)\}/g;
+                    let varMatch;
+                    while ((varMatch = varRegex.exec(text)) !== null) {
+                        text = text.replace(`{${varMatch[1]}}`, `[${varMatch[1]}]`);
+                    }
+                    logs.push(`[Python] ${text}`);
+                }
+                
+                if (logs.length === 0 && !inputMatch) {
+                    addToTerminal('✅ Python simulation completed. No print statements found.', 'output');
+                }
+                
+            } 
+            else if (ext === 'c') {
+                // ========== C SIMULATION WITH SCANF SUPPORT ==========
+                addToTerminal('⚙️ Simulating C execution...', 'output');
+                addToTerminal('ℹ️ C runs in simulation mode. scanf() is supported!', 'info');
+                
+                // Find printf statements
+                const printfRegex = /printf\(["'](.*?)["']/g;
+                let match;
+                while ((match = printfRegex.exec(code)) !== null) {
+                    let text = match[1];
+                    text = text.replace(/\\n/g, '\n');
+                    logs.push(`[C] ${text}`);
+                }
+                
+                // Find scanf statements and simulate input
+                const scanfRegex = /scanf\(["']([^"']*)["']\s*,\s*&(\w+)/g;
+                let scanfMatch;
+                while ((scanfMatch = scanfRegex.exec(code)) !== null) {
+                    const format = scanfMatch[1];
+                    const varName = scanfMatch[2];
+                    let prompt = `Enter value for ${varName}`;
+                    if (format.includes('%s')) prompt = `Enter string for ${varName}: `;
+                    if (format.includes('%d')) prompt = `Enter integer for ${varName}: `;
+                    if (format.includes('%f')) prompt = `Enter float for ${varName}: `;
+                    
+                    const value = await getProgramInput(prompt);
+                    logs.push(`[C] scanf: ${varName} = ${value}`);
+                }
+                
+            } 
+            else if (ext === 'cpp') {
+                // ========== C++ SIMULATION WITH CIN SUPPORT ==========
+                addToTerminal('⚙️ Simulating C++ execution...', 'output');
+                addToTerminal('ℹ️ C++ runs in simulation mode. cin is supported!', 'info');
+                
+                // Find cout statements
+                const coutRegex = /cout\s*<<\s*["'](.*?)["']/g;
+                let match;
+                while ((match = coutRegex.exec(code)) !== null) {
+                    let text = match[1];
+                    text = text.replace(/<<\s*endl/g, '\n');
+                    logs.push(`[C++] ${text}`);
+                }
+                
+                // Find cin statements
+                const cinRegex = /cin\s*>>\s*(\w+)/g;
+                let cinMatch;
+                while ((cinMatch = cinRegex.exec(code)) !== null) {
+                    const varName = cinMatch[1];
+                    const value = await getProgramInput(`Enter value for ${varName}: `);
+                    logs.push(`[C++] cin: ${varName} = ${value}`);
+                }
+                
+            } 
+            else if (ext === 'java') {
+                // ========== JAVA SIMULATION WITH SCANNER SUPPORT ==========
+                addToTerminal('☕ Simulating Java execution...', 'output');
+                addToTerminal('ℹ️ Java runs in simulation mode. Scanner is supported!', 'info');
+                
+                // Find System.out.println statements
+                const javaPrintRegex = /System\.out\.println\(["'](.*?)["']\)/g;
+                let match;
+                while ((match = javaPrintRegex.exec(code)) !== null) {
+                    logs.push(`[Java] ${match[1]}`);
+                }
+                
+                // Find Scanner nextLine/nextInt calls
+                const scannerNextRegex = /scanner\.nextLine\(\)|scanner\.nextInt\(\)|scanner\.next\(\)/g;
+                let scannerMatch;
+                let inputCount = 0;
+                while ((scannerMatch = scannerNextRegex.exec(code)) !== null) {
+                    inputCount++;
+                    const value = await getProgramInput(`Scanner input ${inputCount}: `);
+                    logs.push(`[Java] Scanner input ${inputCount} = ${value}`);
+                }
+                
+            }
+            else if (ext === 'ts' || ext === 'typescript') {
+                // ========== TYPESCRIPT SIMULATION ==========
+                addToTerminal('🔷 Simulating TypeScript execution...', 'output');
+                addToTerminal('ℹ️ TypeScript runs in simulation mode.', 'info');
+                
+                const tsPrintRegex = /console\.log\(['"`](.*?)['"`]\)/g;
+                let match;
+                while ((match = tsPrintRegex.exec(code)) !== null) {
+                    logs.push(`[TypeScript] ${match[1]}`);
+                }
+                
+                // Also support input in TypeScript
+                const tsInputRegex = /await input\(['"`](.*?)['"`]\)/g;
+                let inputMatch;
+                while ((inputMatch = tsInputRegex.exec(code)) !== null) {
+                    await getProgramInput(inputMatch[1]);
+                }
+            }
+            else {
+                addToTerminal(`❌ Unsupported file type: .${ext}`, 'error');
+                addToTerminal('Supported: .js, .ts, .py, .c, .cpp, .java', 'info');
+            }
+            
+            // Display all captured output
+            if (logs.length > 0) {
+                addToTerminal(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'success');
+                addToTerminal(`📤 PROGRAM OUTPUT:`, 'success');
+                addToTerminal(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'success');
+                logs.forEach(log => addToTerminal(`   ${log}`, 'output'));
+            } else if (ext !== 'js') {
+                addToTerminal(`✅ Execution completed! No output statements found.`, 'success');
+            }
+            
+            addToTerminal(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'output');
+            addToTerminal(`✅ Execution finished!`, 'success');
+            
+        } catch (err) {
+            addToTerminal(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'error');
+            addToTerminal(`❌ ERROR: ${err.message}`, 'error');
+            addToTerminal(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'error');
+            console.error(err);
+        } finally {
+            console.log = originalLog;
+            waitingForInput = false;
+            if (inputResolve) {
+                inputResolve(null);
+                inputResolve = null;
+            }
+            // Reset terminal input placeholder
+            const termInput = document.getElementById('term-in');
+            if (termInput) {
+                termInput.placeholder = "";
+                termInput.value = "";
+                termInput.focus();
+            }
+        }
+    }
+    
+    // ---------- ZHIPU AI (WORKING FROM FILE) ----------
+    function addAIMessage(sender, text) {
+        const container = document.getElementById('ai-messages');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `ai-message ${sender === 'You' ? 'user' : 'assistant'}`;
+        
+        if (sender === 'You') {
+            msgDiv.innerHTML = text.replace(/\n/g, '<br>');
+        } else {
+            // Format code blocks
+            let formatted = text;
+            const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
+            formatted = formatted.replace(codeBlockRegex, (match, lang, code) => {
+                return `<div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span class="code-language">${lang || 'code'}</span>
+                        <button class="copy-code-btn" onclick="copyCodeToClipboard(this)">📋 Copy</button>
+                    </div>
+                    <pre class="code-content">${escapeHtml(code.trim())}</pre>
+                </div>`;
+            });
+            formatted = formatted.replace(/\n/g, '<br>');
+            msgDiv.innerHTML = formatted;
+        }
+        
+        container.appendChild(msgDiv);
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function copyCodeToClipboard(button) {
+        const codeBlock = button.closest('.code-block-wrapper')?.querySelector('.code-content');
+        if (codeBlock) {
+            const code = codeBlock.textContent || '';
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copied!';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+                addToTerminal('📋 Code copied to clipboard!', 'success');
+            }).catch(() => {
+                addToTerminal('❌ Failed to copy code', 'error');
+            });
+        }
+    }
+    
+    function addTypingIndicator() {
+        const container = document.getElementById('ai-messages');
+        const indicator = document.createElement('div');
+        indicator.className = 'ai-message assistant';
+        indicator.id = 'typing-indicator';
+        indicator.innerHTML = '🤔 Xzetron is thinking...';
+        container.appendChild(indicator);
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) indicator.remove();
+    }
+    
+    async function callZhipuAPI(prompt, codeContext, filename) {
+        const systemPrompt = `You are Xzetron Ultra, a friendly and helpful coding assistant with 744B parameters.
+
+IMPORTANT RULES:
+1. Be conversational and natural — don't just output raw code
+2. Explain concepts in simple terms first
+3. When showing code, ALWAYS use triple backticks with the language name
+4. Keep responses concise but helpful
+5. If the user asks a general question, answer normally
+6. If they ask for code, provide explanation THEN code
+
+Current file the user is working on: ${filename}
+Current code in editor:
+\`\`\`
+${codeContext}
+\`\`\`
+
+User question: ${prompt}
+
+Respond naturally. If code is requested, explain it first. Always be helpful and friendly.`;
+
+        try {
+            const response = await fetch(ZHIPU_BASE, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${ZHIPU_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: "glm-4-flash",
+                    messages: [
+                        { 
+                            role: "system", 
+                            content: "You are Xzetron Ultra, a coding assistant. Respond conversationally with explanations. Use code blocks with triple backticks when showing code. Be friendly and helpful to the user who is an 11-year-old coder named Ryuu." 
+                        },
+                        { role: "user", content: systemPrompt }
+                    ],
+                    temperature: 0.8,
+                    max_tokens: 4096
+                })
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API Error ${response.status}: ${errorText.substring(0, 100)}`);
+            }
+            
+            const data = await response.json();
+            return data.choices[0].message.content;
+        } catch (error) {
+            console.error('Zhipu API Error:', error);
+            
+            // Fallback response that's helpful and conversational
+            return `Hey Ryuu! 👋
+
+I see you asked: **"${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}"**
+
+Here's what I can help with:
+
+\`\`\`javascript
+// Example code for: ${prompt.substring(0, 50)}
+function example() {
+    console.log("Try asking me something specific!");
+    console.log("Like: 'How do I make a function?'");
+    console.log("Or: 'Fix this code for me'");
+    return "I'm here to help! 🚀";
+}
+
+example();
+\`\`\`
+
+**Note:** The API is connected but having issues right now. This is a demo response.
+
+What would you like me to help you code today? 💻`;
+        }
+    }
+    
+    async function sendAIMessage() {
+        const input = document.getElementById('ai-input');
+        const question = input.value.trim();
+        
+        if (!question) {
+            addToTerminal('⚠️ Please enter a question', 'warning');
+            return;
+        }
+        
+        if (aiThinking) {
+            addToTerminal('⏳ Xzetron is already thinking...', 'warning');
+            return;
+        }
+        
+        input.value = '';
+        addAIMessage('You', question);
+        addTypingIndicator();
+        aiThinking = true;
+        
+        const statusIndicator = document.getElementById('ai-status-indicator');
+        if (statusIndicator) {
+            statusIndicator.innerHTML = '🤖 Thinking...';
+            statusIndicator.style.opacity = '0.7';
+        }
+        
+        const currentCode = editor ? editor.getValue() : '';
+        const filename = currentFile;
+        
+        try {
+            const response = await callZhipuAPI(question, currentCode, filename);
+            removeTypingIndicator();
+            addAIMessage('Assistant', response);
+            addToTerminal(`🤖 Xzetron responded!`, 'success');
+        } catch (error) {
+            removeTypingIndicator();
+            addAIMessage('Assistant', `❌ Sorry, I encountered an error: ${error.message}`);
+            addToTerminal(`❌ AI Error: ${error.message}`, 'error');
+        } finally {
+            aiThinking = false;
+            if (statusIndicator) {
+                statusIndicator.innerHTML = '⚡ Ready';
+                statusIndicator.style.opacity = '1';
+            }
+        }
+    }
+    
+    function handleAIKeydown(event) {
+        // Shift+Enter or Ctrl+Enter sends message
+        if (event.key === 'Enter' && (event.shiftKey || event.ctrlKey)) {
+            event.preventDefault();
+            sendAIMessage();
+        }
+        // Regular Enter just adds a new line (default)
+    }
+    
+    function clearAIChat() {
+        const container = document.getElementById('ai-messages');
+        container.innerHTML = `<div class="ai-message assistant">✨ Xzetron Ultra ready! Ask me to generate code!</div>`;
+        addToTerminal('🧹 AI chat cleared', 'success');
+    }
+    
+    // ---------- THEME TOGGLE ----------
+    function toggleTheme() {
+        const body = document.body;
+        if (currentTheme === 'dark') {
+            body.classList.remove('theme-dark');
+            body.classList.add('theme-light');
+            currentTheme = 'light';
+            if (editor) monaco.editor.setTheme('light');
+        } else {
+            body.classList.remove('theme-light');
+            body.classList.add('theme-dark');
+            currentTheme = 'dark';
+            if (editor) monaco.editor.setTheme('vs-dark');
+        }
+        addToTerminal(`🎨 Theme switched to ${currentTheme.toUpperCase()}`, 'success');
+        closeAllOverlays();
+    }
+    
+    // ---------- UI HELPERS ----------
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('hidden');
+    }
+    
+    function toggleTerminal() {
+        document.getElementById('bottom-panel').classList.toggle('hidden');
+    }
+    
+    function toggleRightSidebar() {
+        document.getElementById('right-sidebar').classList.toggle('hidden');
+    }
+    
+    function switchSidebarView(view) {
+        document.querySelectorAll('.sidebar-view').forEach(v => v.classList.remove('active'));
+        document.getElementById(`view-${view}`)?.classList.add('active');
+    }
+    
+    function openCommandPalette() {
+        const palette = document.getElementById('cmd-palette');
+        const glass = document.getElementById('glass-layer');
+        palette.style.display = 'flex';
+        glass.style.display = 'block';
+        document.getElementById('cmd-input').focus();
+    }
+    
+    function closeAllOverlays() {
+        document.getElementById('cmd-palette').style.display = 'none';
+        document.getElementById('context-menu').style.display = 'none';
+        document.getElementById('glass-layer').style.display = 'none';
+    }
+    
+    // ---------- MONACO EDITOR INITIALIZATION ----------
+    require.config({ 
+        paths: { 
+            'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' 
+        } 
+    });
+    
+    require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('monaco-host'), {
+            value: getFileContent('src/main.js'),
+            language: 'javascript',
+            theme: currentTheme === 'dark' ? 'vs-dark' : 'light',
+            automaticLayout: true,
+            fontSize: 13,
+            fontFamily: 'Fira Code, Consolas, monospace',
+            minimap: { enabled: true },
+            scrollBeyondLastLine: false,
+            tabSize: 4,
+            wordWrap: 'on'
+        });
+        
+        editor.onDidChangeCursorPosition((e) => {
+            document.getElementById('cursor-pos').innerHTML = `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
+        });
+        
+        // Register keyboard shortcuts
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => saveFile());
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyN, () => newFile());
+        editor.addCommand(monaco.KeyCode.F5, () => runCode());
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyT, () => toggleTheme());
+        
+        window.editor = editor;
+        addToTerminal('✅ Monaco Editor loaded successfully!', 'success');
+        addToTerminal('✅ Input support enabled! Code can now use input() / scanf() / cin', 'success');
+    });
+    
+    // ---------- KEYBOARD SHORTCUTS ----------
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            openCommandPalette();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            newFile();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            saveFile();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+            e.preventDefault();
+            toggleTheme();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            clearTerminal();
+        }
+        if (e.key === 'F5') {
+            e.preventDefault();
+            runCode();
+        }
+        if (e.key === 'Escape') {
+            closeAllOverlays();
+        }
+    });
+    
+    // ---------- CONTEXT MENU ----------
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const menu = document.getElementById('context-menu');
+        menu.style.display = 'block';
+        menu.style.left = e.pageX + 'px';
+        menu.style.top = e.pageY + 'px';
+        document.addEventListener('click', function closeMenu() {
+            menu.style.display = 'none';
+            document.removeEventListener('click', closeMenu);
+        });
+    });
+    
+    // ---------- AUTO-SAVE ----------
+    let autoSaveInterval;
+    function startAutoSave() {
+        autoSaveInterval = setInterval(() => {
+            if (editor && currentFile) {
+                const content = editor.getValue();
+                saveFileContent(currentFile, content);
+            }
+        }, 30000);
+    }
+    
+    // ---------- INITIALIZATION ----------
+    function init() {
+        renderFileTree();
+        renderTabs();
+        openFile('src/main.js');
+        startAutoSave();
+        setTimeout(() => focusTerminal(), 1000);
+        addToTerminal('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'success');
+        addToTerminal('🌟 RYUU STUDIO PRO v1.8.9 IS READY! 🌟', 'success');
+        addToTerminal('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'success');
+        addToTerminal('📁 Try the example files in the src folder!', 'info');
+        addToTerminal('🎮 Try example_game.js - a number guessing game!', 'info');
+        addToTerminal('⌨️ Press F5 to run code with INPUT support', 'info');
+        addToTerminal('🤖 Ask Xzetron Ultra AI any coding question!', 'info');
+        addToTerminal('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'output');
+    }
+    
+    // Expose functions globally
+    window.toggleSidebar = toggleSidebar;
+    window.toggleTerminal = toggleTerminal;
+    window.toggleRightSidebar = toggleRightSidebar;
+    window.switchSidebarView = switchSidebarView;
+    window.openCommandPalette = openCommandPalette;
+    window.closeAllOverlays = closeAllOverlays;
+    window.newFile = newFile;
+    window.closeTab = closeTab;
+    window.openFile = openFile;
+    window.runCode = runCode;
+    window.saveFile = saveFile;
+    window.handleTerminalCommand = handleTerminalCommand;
+    window.focusTerminal = focusTerminal;
+    window.clearTerminal = clearTerminal;
+    window.toggleTheme = toggleTheme;
+    window.toggleFolder = toggleFolder;
+    window.sendAIMessage = sendAIMessage;
+    window.handleAIKeydown = handleAIKeydown;
+    window.clearAIChat = clearAIChat;
+    window.copyCodeToClipboard = copyCodeToClipboard;
+    window.showOutputPanel = showOutputPanel;
+    
+    // Start everything
+    window.addEventListener('DOMContentLoaded', init);
+    
+    // Save before unload
+    window.addEventListener('beforeunload', () => {
+        if (editor && currentFile) {
+            saveFileContent(currentFile, editor.getValue());
+        }
+    });
+</script>
+</body>
+</html>
