@@ -52,3 +52,6 @@ async function playGame() {
         }
     }
 }
+
+Get your own free API key from open.bigmodel.cn for the ai to work and add the key
+
